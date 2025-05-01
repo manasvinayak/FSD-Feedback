@@ -1,0 +1,106 @@
+<app-header></app-header>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    <p>View and analyze feedback submitted by participants</p>
+  </div>
+  
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading feedback data...</p>
+  </div>
+  
+  <div *ngIf="!isLoading" class="dashboard-content">
+    <div class="analytics-section">
+      <h2>Feedback Analytics</h2>
+      
+      <div class="analytics-cards">
+        <div class="analytics-card">
+          <h3>Total Responses</h3>
+          <div class="analytics-value">{{ totalResponses }}</div>
+        </div>
+        
+        <div class="analytics-card">
+          <h3>Overall Rating</h3>
+          <div class="analytics-value">{{ averageRatings.overall }}/5</div>
+          <div class="stars">
+            <span *ngFor="let star of getStarArray(averageRatings.overall)" class="star filled">★</span>
+            <span *ngFor="let star of getEmptyStarArray(averageRatings.overall)" class="star">★</span>
+          </div>
+        </div>
+        
+        <div class="analytics-card">
+          <h3>Venue Facilities</h3>
+          <div class="analytics-value">{{ averageRatings.venue }}/5</div>
+          <div class="stars">
+            <span *ngFor="let star of getStarArray(averageRatings.venue)" class="star filled">★</span>
+            <span *ngFor="let star of getEmptyStarArray(averageRatings.venue)" class="star">★</span>
+          </div>
+        </div>
+        
+        <div class="analytics-card">
+          <h3>Organization</h3>
+          <div class="analytics-value">{{ averageRatings.organization }}/5</div>
+          <div class="stars">
+            <span *ngFor="let star of getStarArray(averageRatings.organization)" class="star filled">★</span>
+            <span *ngFor="let star of getEmptyStarArray(averageRatings.organization)" class="star">★</span>
+          </div>
+        </div>
+        
+        <div class="analytics-card">
+          <h3>Technical Content</h3>
+          <div class="analytics-value">{{ averageRatings.technical }}/5</div>
+          <div class="stars">
+            <span *ngFor="let star of getStarArray(averageRatings.technical)" class="star filled">★</span>
+            <span *ngFor="let star of getEmptyStarArray(averageRatings.technical)" class="star">★</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="feedback-list-section">
+      <div class="section-header">
+        <h2>Feedback Responses</h2>
+        <button (click)="exportToExcel()" class="btn-primary export-btn">
+          <span>Export to Excel</span>
+        </button>
+      </div>
+      
+      <div *ngIf="feedbackList.length === 0" class="no-data">
+        <p>No feedback submissions yet.</p>
+      </div>
+      
+      <div *ngIf="feedbackList.length > 0" class="feedback-table-container">
+        <table class="feedback-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Contact</th>
+              <th>Overall</th>
+              <th>Venue</th>
+              <th>Organization</th>
+              <th>Technical</th>
+              <th>Comments</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let feedback of feedbackList">
+              <td>{{ feedback.name }}</td>
+              <td>{{ feedback.email }}</td>
+              <td>{{ feedback.contactNo }}</td>
+              <td>{{ feedback.overallEventQuality }}/5</td>
+              <td>{{ feedback.venueFacilities }}/5</td>
+              <td>{{ feedback.orgManagement }}/5</td>
+              <td>{{ feedback.techContent }}/5</td>
+              <td>{{ feedback.comments || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer> 

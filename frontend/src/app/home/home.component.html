@@ -1,0 +1,57 @@
+<app-header></app-header>
+
+<div class="home-container">
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1>TechFest <span class="highlight">Feedback</span></h1>
+      <p>We value your opinion. Help us improve by sharing your experience with our events.</p>
+      
+      <!-- Hide feedback form link for admin users -->
+      <div class="cta-buttons">
+        <a routerLink="/feedback" class="btn-primary" *ngIf="!isAdmin()">
+          <i class="fas fa-clipboard-list"></i> Fill Feedback
+        </a>
+        
+        <!-- Show alternative buttons for admin users -->
+        <ng-container *ngIf="isAdmin()">
+          <a routerLink="/dashboard" class="btn-primary">
+            <i class="fas fa-chart-bar"></i> View Dashboard
+          </a>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+  
+  <div class="about-section">
+    <h2>About TechFest</h2>
+    <p>TechFest is the annual technology festival that brings together the brightest minds to showcase innovation, learn from industry experts, and participate in exciting workshops and competitions.</p>
+    
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-microphone"></i>
+        </div>
+        <h3>Tech Talks</h3>
+        <p>Attend inspiring sessions from leading innovators and thought leaders in the tech industry.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-laptop-code"></i>
+        </div>
+        <h3>Workshops</h3>
+        <p>Hands-on learning experience on cutting-edge technologies taught by industry experts.</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-trophy"></i>
+        </div>
+        <h3>Competitions</h3>
+        <p>Challenge yourself and showcase your skills in various programming and design competitions.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer> 

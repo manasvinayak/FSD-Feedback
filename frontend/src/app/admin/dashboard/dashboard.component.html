@@ -1,0 +1,370 @@
+<app-header></app-header>
+
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    <p>View and manage feedback submissions</p>
+  </div>
+
+  <div class="dashboard-nav">
+    <div class="nav-card" [class.active]="activeSection === 'overview'" (click)="navigateToSection('overview')">
+      <i class="fas fa-chart-bar"></i>
+      <span>Dashboard Overview</span>
+    </div>
+    <div class="nav-card" [class.active]="activeSection === 'feedback'" (click)="navigateToSection('feedback')">
+      <i class="fas fa-list-alt"></i>
+      <span>All Feedback</span>
+    </div>
+    <div class="nav-card" [class.active]="activeSection === 'analytics'" (click)="navigateToSection('analytics')">
+      <i class="fas fa-chart-pie"></i>
+      <span>Analytics</span>
+    </div>
+    <div class="nav-card" [class.active]="activeSection === 'settings'" (click)="navigateToSection('settings')">
+      <i class="fas fa-cog"></i>
+      <span>Settings</span>
+    </div>
+  </div>
+
+  <!-- Dashboard Overview Section -->
+  <div class="dashboard-content" *ngIf="activeSection === 'overview'">
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-comment-alt"></i>
+        </div>
+        <div class="stat-info">
+          <h3>Total Feedback</h3>
+          <p class="stat-value">{{feedbackCount || 0}}</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-info">
+          <h3>Average Rating</h3>
+          <p class="stat-value">{{averageRating || 0}}</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-info">
+          <h3>Participants</h3>
+          <p class="stat-value">{{participantCount || 0}}</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-info">
+          <h3>Completion Rate</h3>
+          <p class="stat-value">{{completionRate || '0%'}}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="recent-feedback">
+      <div class="section-header">
+        <h2>Recent Feedback</h2>
+        <button class="btn-secondary" (click)="navigateToSection('feedback')">View All</button>
+      </div>
+      
+      <div class="feedback-table-container">
+        <div *ngIf="loading" class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Loading feedback data...</p>
+        </div>
+        
+        <table class="feedback-table" *ngIf="!loading">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Date</th>
+              <th>Overall Rating</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="feedbackList.length === 0">
+              <td colspan="5" class="no-data">No feedback submissions found.</td>
+            </tr>
+            <tr *ngFor="let feedback of feedbackList.slice(0, 5)">
+              <td>{{feedback.name}}</td>
+              <td>{{feedback.email}}</td>
+              <td>{{feedback.dateTime | date:'MMM d, yyyy'}}</td>
+              <td>
+                <div class="star-rating">
+                  <ng-container *ngFor="let star of getStarArray(feedback.overallEventQuality)">
+                    <i class="fas fa-star"></i>
+                  </ng-container>
+                  <ng-container *ngFor="let star of getEmptyStarArray(feedback.overallEventQuality)">
+                    <i class="far fa-star"></i>
+                  </ng-container>
+                </div>
+              </td>
+              <td>
+                <button class="action-btn view-btn" title="View Details" (click)="viewFeedback(feedback)">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="action-btn edit-btn" title="Edit Feedback" (click)="editFeedback(feedback)">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- All Feedback Section -->
+  <div class="dashboard-content" *ngIf="activeSection === 'feedback'">
+    <div class="section-header">
+      <h2>All Feedback Submissions</h2>
+      <div class="filter-controls">
+        <input type="text" placeholder="Search by name or email..." class="search-input" [(ngModel)]="searchTerm" (input)="filterFeedback()">
+        <button class="btn-secondary" (click)="refreshFeedbackList()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+    </div>
+    
+    <div class="feedback-table-container">
+      <div *ngIf="loading" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading feedback data...</p>
+      </div>
+      
+      <table class="feedback-table" *ngIf="!loading">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Contact</th>
+            <th>Date</th>
+            <th>Overall</th>
+            <th>Technical</th>
+            <th>Venue</th>
+            <th>Organization</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredFeedbackList.length === 0">
+            <td colspan="9" class="no-data">No feedback submissions found.</td>
+          </tr>
+          <tr *ngFor="let feedback of filteredFeedbackList">
+            <td>{{feedback.name}}</td>
+            <td>{{feedback.email}}</td>
+            <td>{{feedback.contactNo}}</td>
+            <td>{{feedback.dateTime | date:'MMM d, yyyy'}}</td>
+            <td>{{feedback.overallEventQuality}}/5</td>
+            <td>{{feedback.techContent}}/5</td>
+            <td>{{feedback.venueFacilities}}/5</td>
+            <td>{{feedback.orgManagement}}/5</td>
+            <td>
+              <button class="action-btn view-btn" title="View Details" (click)="viewFeedback(feedback)">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn edit-btn" title="Edit Feedback" (click)="editFeedback(feedback)">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn delete-btn" title="Delete Feedback" (click)="deleteFeedback(feedback)">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Analytics Section -->
+  <div class="dashboard-content" *ngIf="activeSection === 'analytics'">
+    <div class="section-header">
+      <h2>Feedback Analytics</h2>
+    </div>
+    
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="chart-container">
+          <h3>Rating Distribution</h3>
+          <div class="rating-bars">
+            <div class="rating-bar-container" *ngFor="let rating of [5,4,3,2,1]">
+              <span class="rating-label">{{rating}} star</span>
+              <div class="rating-bar">
+                <div class="rating-bar-fill" 
+                     [style.width]="getRatingPercentage(rating) + '%'"></div>
+              </div>
+              <span class="rating-count">{{getRatingCount(rating)}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="chart-container">
+          <h3>Average Ratings by Category</h3>
+          <div class="category-bars">
+            <div class="category-bar-container">
+              <span class="category-label">Overall</span>
+              <div class="category-bar">
+                <div class="category-bar-fill" 
+                     [style.width]="(averageRating/5*100) + '%'"></div>
+              </div>
+              <span class="category-value">{{averageRating}}</span>
+            </div>
+            <div class="category-bar-container">
+              <span class="category-label">Technical</span>
+              <div class="category-bar">
+                <div class="category-bar-fill" 
+                     [style.width]="(techContentAvg/5*100) + '%'"></div>
+              </div>
+              <span class="category-value">{{techContentAvg}}</span>
+            </div>
+            <div class="category-bar-container">
+              <span class="category-label">Venue</span>
+              <div class="category-bar">
+                <div class="category-bar-fill" 
+                     [style.width]="(venueAvg/5*100) + '%'"></div>
+              </div>
+              <span class="category-value">{{venueAvg}}</span>
+            </div>
+            <div class="category-bar-container">
+              <span class="category-label">Organization</span>
+              <div class="category-bar">
+                <div class="category-bar-fill" 
+                     [style.width]="(orgAvg/5*100) + '%'"></div>
+              </div>
+              <span class="category-value">{{orgAvg}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Section -->
+  <div class="dashboard-content" *ngIf="activeSection === 'settings'">
+    <div class="section-header">
+      <h2>Dashboard Settings</h2>
+    </div>
+    
+    <div class="settings-content">
+      <div class="settings-card">
+        <h3>Export Data</h3>
+        <p>Download all feedback data in various formats</p>
+        <div class="export-buttons">
+          <button class="btn-secondary">
+            <i class="fas fa-file-csv"></i> Export as CSV
+          </button>
+          <button class="btn-secondary">
+            <i class="fas fa-file-excel"></i> Export as Excel
+          </button>
+          <button class="btn-secondary">
+            <i class="fas fa-file-pdf"></i> Export as PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback Detail Modal (would be implemented with a proper modal component) -->
+  <div class="modal" *ngIf="selectedFeedback">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Feedback Details</h2>
+        <button class="close-btn" (click)="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="feedback-detail-row">
+          <span class="detail-label">Name:</span>
+          <span class="detail-value">{{selectedFeedback.name}}</span>
+        </div>
+        <div class="feedback-detail-row">
+          <span class="detail-label">Email:</span>
+          <span class="detail-value">{{selectedFeedback.email}}</span>
+        </div>
+        <div class="feedback-detail-row">
+          <span class="detail-label">Contact:</span>
+          <span class="detail-value">{{selectedFeedback.contactNo}}</span>
+        </div>
+        <div class="feedback-detail-row">
+          <span class="detail-label">Date:</span>
+          <span class="detail-value">{{selectedFeedback.dateTime | date:'MMM d, yyyy, h:mm a'}}</span>
+        </div>
+        <div class="feedback-detail-row">
+          <span class="detail-label">Overall Rating:</span>
+          <span class="detail-value">
+            <div class="star-rating">
+              <ng-container *ngFor="let star of getStarArray(selectedFeedback.overallEventQuality)">
+                <i class="fas fa-star"></i>
+              </ng-container>
+              <ng-container *ngFor="let star of getEmptyStarArray(selectedFeedback.overallEventQuality)">
+                <i class="far fa-star"></i>
+              </ng-container>
+            </div>
+          </span>
+        </div>
+        <div class="feedback-detail-row">
+          <span class="detail-label">Technical Content:</span>
+          <span class="detail-value">
+            <div class="star-rating">
+              <ng-container *ngFor="let star of getStarArray(selectedFeedback.techContent)">
+                <i class="fas fa-star"></i>
+              </ng-container>
+              <ng-container *ngFor="let star of getEmptyStarArray(selectedFeedback.techContent)">
+                <i class="far fa-star"></i>
+              </ng-container>
+            </div>
+          </span>
+        </div>
+        <div class="feedback-detail-row">
+          <span class="detail-label">Venue Facilities:</span>
+          <span class="detail-value">
+            <div class="star-rating">
+              <ng-container *ngFor="let star of getStarArray(selectedFeedback.venueFacilities)">
+                <i class="fas fa-star"></i>
+              </ng-container>
+              <ng-container *ngFor="let star of getEmptyStarArray(selectedFeedback.venueFacilities)">
+                <i class="far fa-star"></i>
+              </ng-container>
+            </div>
+          </span>
+        </div>
+        <div class="feedback-detail-row">
+          <span class="detail-label">Organization Management:</span>
+          <span class="detail-value">
+            <div class="star-rating">
+              <ng-container *ngFor="let star of getStarArray(selectedFeedback.orgManagement)">
+                <i class="fas fa-star"></i>
+              </ng-container>
+              <ng-container *ngFor="let star of getEmptyStarArray(selectedFeedback.orgManagement)">
+                <i class="far fa-star"></i>
+              </ng-container>
+            </div>
+          </span>
+        </div>
+        <div class="feedback-detail-row" *ngIf="selectedFeedback.comments">
+          <span class="detail-label">Comments:</span>
+          <span class="detail-value comments">{{selectedFeedback.comments}}</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()">Close</button>
+        <button class="btn-primary" (click)="editFeedback(selectedFeedback)">Edit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer></app-footer> 

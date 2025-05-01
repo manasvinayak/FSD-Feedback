@@ -1,0 +1,128 @@
+<div class="form-editor-container">
+  <div class="card form-editor-card">
+    <div class="card-header">
+      <h2>Form Editor</h2>
+      <div class="buttons">
+        <button type="button" class="btn btn-outline-secondary" routerLink="/dashboard">
+          <i class="bi bi-arrow-left"></i> Back
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div *ngIf="showSuccessAlert" class="alert alert-success alert-animated">
+        Form saved successfully!
+      </div>
+      
+      <form [formGroup]="formEditorForm" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+          <label for="formTitle" class="form-label">Form Title</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="formTitle" 
+            formControlName="title"
+            [ngClass]="{'is-invalid': formEditorForm.get('title')?.invalid && formEditorForm.get('title')?.touched}"
+          >
+          <div class="invalid-feedback" *ngIf="formEditorForm.get('title')?.errors?.['required'] && formEditorForm.get('title')?.touched">
+            Title is required
+          </div>
+          <div class="invalid-feedback" *ngIf="formEditorForm.get('title')?.errors?.['minlength'] && formEditorForm.get('title')?.touched">
+            Title must be at least 3 characters
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="formDescription" class="form-label">Form Description</label>
+          <textarea 
+            class="form-control" 
+            id="formDescription" 
+            formControlName="description"
+            rows="3"
+            [ngClass]="{'is-invalid': formEditorForm.get('description')?.invalid && formEditorForm.get('description')?.touched}"
+          ></textarea>
+          <div class="invalid-feedback" *ngIf="formEditorForm.get('description')?.errors?.['required'] && formEditorForm.get('description')?.touched">
+            Description is required
+          </div>
+        </div>
+        
+        <div class="form-fields-section">
+          <h3>Form Fields</h3>
+          <div formArrayName="fields">
+            <div *ngFor="let field of fields.controls; let i = index" class="field-card card-animated">
+              <div [formGroupName]="i" class="p-3 border rounded mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h5 class="mb-0">Field #{{i + 1}}</h5>
+                  <button type="button" class="btn btn-sm btn-danger" (click)="removeField(i)">
+                    <i class="bi bi-trash"></i> Remove
+                  </button>
+                </div>
+                
+                <div class="mb-3">
+                  <label [for]="'fieldLabel' + i" class="form-label">Field Label</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    [id]="'fieldLabel' + i" 
+                    formControlName="label"
+                    [ngClass]="{'is-invalid': field.get('label')?.invalid && field.get('label')?.touched}"
+                  >
+                  <div class="invalid-feedback" *ngIf="field.get('label')?.errors?.['required'] && field.get('label')?.touched">
+                    Label is required
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label [for]="'fieldType' + i" class="form-label">Field Type</label>
+                  <select 
+                    class="form-select" 
+                    [id]="'fieldType' + i" 
+                    formControlName="type"
+                  >
+                    <option *ngFor="let type of getFieldTypeOptions()" [value]="type">
+                      {{type | titlecase}}
+                    </option>
+                  </select>
+                </div>
+                
+                <div class="mb-3" *ngIf="field.get('type')?.value === 'select' || field.get('type')?.value === 'radio' || field.get('type')?.value === 'checkbox'">
+                  <label [for]="'fieldOptions' + i" class="form-label">Options (comma separated)</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    [id]="'fieldOptions' + i" 
+                    formControlName="options"
+                    placeholder="Option 1, Option 2, Option 3"
+                  >
+                </div>
+                
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    [id]="'fieldRequired' + i" 
+                    formControlName="required"
+                  >
+                  <label class="form-check-label" [for]="'fieldRequired' + i">
+                    Required field
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <button type="button" class="btn btn-outline-primary mb-4" (click)="addField()">
+            <i class="bi bi-plus-circle"></i> Add Field
+          </button>
+        </div>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+          <button type="reset" class="btn btn-secondary me-md-2">Reset</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            Save Form
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> 

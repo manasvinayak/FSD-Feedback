@@ -1,0 +1,201 @@
+<app-header></app-header>
+
+<div class="feedback-container">
+  <!-- Error message area -->
+  <div *ngIf="errorMessage" class="error-alert">
+    <p>{{ errorMessage }}</p>
+    <button (click)="errorMessage = ''" class="btn-secondary">Dismiss</button>
+  </div>
+
+  <div *ngIf="!currentUser" class="login-prompt">
+    <h2>Please Login</h2>
+    <p>You need to be logged in to submit feedback.</p>
+    <a routerLink="/auth/login" class="btn-primary">Login</a>
+    <a routerLink="/auth/register" class="btn-secondary">Sign Up</a>
+  </div>
+
+  <div *ngIf="currentUser && submitted && !isEditing" class="feedback-success">
+    <h2>Thank You for Your Feedback!</h2>
+    <div class="feedback-summary">
+      <button (click)="editFeedback()" class="btn-secondary">Edit Feedback</button>
+    </div>
+  </div>
+
+  <div *ngIf="currentUser && (!submitted || isEditing)" class="feedback-form-wrapper">
+    <div class="form-header">
+      <h2>{{ isEditing ? 'Edit Your Feedback' : 'Feedback Form' }}</h2>
+      <p>Help us improve by sharing your experience at TechFest</p>
+    </div>
+    
+    <form [formGroup]="feedbackForm" (ngSubmit)="onSubmit()" class="feedback-form">
+      <div class="form-section">
+        <h3>Personal Information</h3>
+        
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input 
+            type="text" 
+            id="name" 
+            formControlName="name" 
+            class="form-control"
+            [ngClass]="{'is-invalid': feedbackForm.get('name')?.touched && feedbackForm.get('name')?.invalid}"
+          >
+          <div *ngIf="feedbackForm.get('name')?.touched && feedbackForm.get('name')?.errors?.['required']" class="error-message">
+            Name is required
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            class="form-control"
+            [ngClass]="{'is-invalid': feedbackForm.get('email')?.touched && feedbackForm.get('email')?.invalid}"
+          >
+          <div *ngIf="feedbackForm.get('email')?.touched && feedbackForm.get('email')?.errors?.['required']" class="error-message">
+            Email is required
+          </div>
+          <div *ngIf="feedbackForm.get('email')?.touched && feedbackForm.get('email')?.errors?.['email']" class="error-message">
+            Please enter a valid email
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="contactNo">Contact Number</label>
+          <input 
+            type="tel" 
+            id="contactNo" 
+            formControlName="contactNo" 
+            class="form-control"
+            placeholder="Enter 10 digit number"
+            [ngClass]="{'is-invalid': feedbackForm.get('contactNo')?.touched && feedbackForm.get('contactNo')?.invalid}"
+          >
+          <div *ngIf="feedbackForm.get('contactNo')?.touched && feedbackForm.get('contactNo')?.errors?.['required']" class="error-message">
+            Contact number is required
+          </div>
+          <div *ngIf="feedbackForm.get('contactNo')?.touched && feedbackForm.get('contactNo')?.errors?.['pattern']" class="error-message">
+            Please enter a valid 10-digit contact number
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Event Ratings</h3>
+        <p class="rating-note">Please rate on a scale of 1 to 5 (1 being poor, 5 being excellent)</p>
+        
+        <div class="rating-group">
+          <label>Overall Event Experience</label>
+          <div class="rating-control">
+            <div class="rating-options">
+              <div *ngFor="let rating of [1, 2, 3, 4, 5]" class="rating-option">
+                <input 
+                  type="radio" 
+                  id="overall-{{rating}}" 
+                  [value]="rating" 
+                  formControlName="overallEventQuality"
+                >
+                <label for="overall-{{rating}}">{{rating}}</label>
+              </div>
+            </div>
+            <div class="rating-labels">
+              <span>Poor</span>
+              <span>Excellent</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="rating-group">
+          <label>Venue Facilities</label>
+          <div class="rating-control">
+            <div class="rating-options">
+              <div *ngFor="let rating of [1, 2, 3, 4, 5]" class="rating-option">
+                <input 
+                  type="radio" 
+                  id="venue-{{rating}}" 
+                  [value]="rating" 
+                  formControlName="venueFacilities"
+                >
+                <label for="venue-{{rating}}">{{rating}}</label>
+              </div>
+            </div>
+            <div class="rating-labels">
+              <span>Poor</span>
+              <span>Excellent</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="rating-group">
+          <label>Organization Management</label>
+          <div class="rating-control">
+            <div class="rating-options">
+              <div *ngFor="let rating of [1, 2, 3, 4, 5]" class="rating-option">
+                <input 
+                  type="radio" 
+                  id="org-{{rating}}" 
+                  [value]="rating" 
+                  formControlName="orgManagement"
+                >
+                <label for="org-{{rating}}">{{rating}}</label>
+              </div>
+            </div>
+            <div class="rating-labels">
+              <span>Poor</span>
+              <span>Excellent</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="rating-group">
+          <label>Technical Content</label>
+          <div class="rating-control">
+            <div class="rating-options">
+              <div *ngFor="let rating of [1, 2, 3, 4, 5]" class="rating-option">
+                <input 
+                  type="radio" 
+                  id="tech-{{rating}}" 
+                  [value]="rating" 
+                  formControlName="techContent"
+                >
+                <label for="tech-{{rating}}">{{rating}}</label>
+              </div>
+            </div>
+            <div class="rating-labels">
+              <span>Poor</span>
+              <span>Excellent</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Additional Comments</h3>
+        
+        <div class="form-group">
+          <label for="comments">Any additional comments or suggestions?</label>
+          <textarea 
+            id="comments" 
+            formControlName="comments" 
+            class="form-control textarea"
+            rows="4"
+            placeholder="Share your thoughts with us..."
+          ></textarea>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="btn-primary" 
+          [disabled]="feedbackForm.invalid || loading"
+        >
+          {{ loading ? 'Submitting...' : (isEditing ? 'Update Feedback' : 'Submit Feedback') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<app-footer></app-footer> 
